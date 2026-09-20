@@ -1,11 +1,11 @@
 
-const CACHE_NAME = "analog-clock-v1";
+const CACHE_NAME = "analog-clock-v2";
 
 const FILES = [
   "./",
-  "./index.html"
+  "./index.html",
+  "./icon-180.png"
 ];
-
 // 時計のファイルをiPhoneに保存する
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -15,9 +15,23 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// 新しいService Workerを有効にする
+
+ // 新しいService Workerを有効にし、古いキャッシュを削除する
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then(async (names) => {
+      await Promise.all(
+        names
+          .filter((name) =>
+            name.startsWith("analog-clock-") &&
+            name !== CACHE_NAME
+          )
+          .map((name) => caches.delete(name))
+      );
+
+      await self.clients.claim();
+    })
+  );
 });
 
 // 保存済みファイルを優先して読み込む
