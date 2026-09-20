@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101926">
+  <title>アナログ時計</title>
+  <style>
+    :root { color-scheme: dark; font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; background: radial-gradient(circle at 50% 36%, #273a50, #101926 68%); color: #f4f5f7; }
+    main { width: min(90vw, 540px); padding: 28px 0; text-align: center; }
+    h1 { margin: 0 0 22px; font-size: clamp(18px, 4vw, 24px); letter-spacing: .18em; font-weight: 500; }
+    .clock { display: block; width: 100%; height: auto; filter: drop-shadow(0 16px 24px rgba(0,0,0,.28)); }
+    .face { fill: #f5f2e9; stroke: #a7b1bd; stroke-width: 3; }
+    .minute-mark { stroke: #647385; stroke-width: 1.6; }
+    .hour-mark { stroke: #1b2938; stroke-width: 4; stroke-linecap: round; }
+    .number { fill: #263547; font-size: 29px; font-family: Georgia, 'Times New Roman', serif; text-anchor: middle; dominant-baseline: central; }
+    .hour-hand { stroke: #1b2938; stroke-width: 11; stroke-linecap: round; }
+    .minute-hand { stroke: #1b2938; stroke-width: 7; stroke-linecap: round; }
+    .second-hand { stroke: #d45748; stroke-width: 2.6; stroke-linecap: round; }
+    .pin { fill: #d45748; stroke: #f5f2e9; stroke-width: 2; }
+    .footer { margin: 18px 0 0; font-size: 14px; letter-spacing: .09em; color: #c5d0dc; }
+    @media (prefers-reduced-motion: reduce) { .clock { filter: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>ANALOG CLOCK</h1>
+    <svg class="clock" viewBox="0 0 400 400" role="img" aria-label="現在時刻を示すアナログ時計">
+      <circle class="face" cx="200" cy="200" r="189" />
+      <g id="ticks"></g>
+      <g id="numbers"></g>
+      <line id="hour" class="hour-hand" x1="200" y1="218" x2="200" y2="112" />
+      <line id="minute" class="minute-hand" x1="200" y1="223" x2="200" y2="67" />
+      <line id="second" class="second-hand" x1="200" y1="234" x2="200" y2="47" />
+      <circle class="pin" cx="200" cy="200" r="6" />
+    </svg>
+    <p class="footer">お使いの端末の現在時刻</p>
+  </main>
+  <script>
+    'use strict';
+    const ns = 'http://www.w3.org/2000/svg';
+    const ticks = document.getElementById('ticks');
+    const numbers = document.getElementById('numbers');
+    for (let i = 0; i < 60; i++) {
+      const line = document.createElementNS(ns, 'line');
+      const isHour = i % 5 === 0;
+      line.setAttribute('x1', '200'); line.setAttribute('y1', isHour ? '24' : '20');
+      line.setAttribute('x2', '200'); line.setAttribute('y2', isHour ? '42' : '29');
+      line.setAttribute('transform', `rotate(${i * 6} 200 200)`);
+      line.setAttribute('class', isHour ? 'hour-mark' : 'minute-mark');
+      ticks.appendChild(line);
+    }
+    for (let n = 1; n <= 12; n++) {
+      const a = n * Math.PI / 6;
+      const label = document.createElementNS(ns, 'text');
+      label.setAttribute('x', (200 + 143 * Math.sin(a)).toFixed(2));
+      label.setAttribute('y', (200 - 143 * Math.cos(a)).toFixed(2));
+      label.setAttribute('class', 'number');
+      label.textContent = n;
+      numbers.appendChild(label);
+    }
+    const hourHand = document.getElementById('hour');
+    const minuteHand = document.getElementById('minute');
+    const secondHand = document.getElementById('second');
+    function updateClock() {
+      const now = new Date();
+      const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+      const minutes = now.getMinutes() + seconds / 60;
+      const hours = now.getHours() % 12 + minutes / 60;
+      hourHand.setAttribute('transform', `rotate(${hours * 30} 200 200)`);
+      minuteHand.setAttribute('transform', `rotate(${minutes * 6} 200 200)`);
+      secondHand.setAttribute('transform', `rotate(${seconds * 6} 200 200)`);
+      requestAnimationFrame(updateClock);
+    }
+    updateClock();
+  </script>
+</body>
+</html>
